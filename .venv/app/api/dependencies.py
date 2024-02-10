@@ -52,6 +52,5 @@ async def get_current_user(
     user = result.scalars().first()
 
     if not user:
-        print("No")
         raise HTTPException(status_code=404, detail="User not found.")
     return user
