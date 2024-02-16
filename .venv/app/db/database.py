@@ -14,10 +14,3 @@ async_engine = create_async_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
 async_session = sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
 
 Base = declarative_base()
-
-"""def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()"""

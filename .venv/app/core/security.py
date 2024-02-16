@@ -8,7 +8,7 @@ from app.core.config import settings
 #from app.api.models.user import UserOut
 from sqlalchemy.orm import Session
 import time
-from app.schemas import AccessTokenResponse
+from app.schemas.user import AccessTokenResponse
 from pydantic import BaseModel
 
 

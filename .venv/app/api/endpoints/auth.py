@@ -1,21 +1,17 @@
 import time
-
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.api import dependencies as deps
 from app.core import config, security
-from app.models import User
-from app.schemas import RefreshTokenRequest
-from app.schemas import AccessTokenResponse
+from app.models.user import User
+from app.schemas.user import RefreshTokenRequest, AccessTokenResponse
 
 
 router = APIRouter()
-
 
 @router.post("/access-token", response_model=AccessTokenResponse)
 async def login_access_token(

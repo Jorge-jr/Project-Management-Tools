@@ -8,9 +8,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 
-from app.core import config, security
+from app.core import security
 from app.core.session import async_session
-from app.models import User
+from app.models.user import User
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="auth/access-token")
 

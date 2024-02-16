@@ -49,7 +49,7 @@ class UserUpdatePasswordRequest(BaseRequest):
 
 class UserCreateRequest(BaseRequest):
     email: EmailStr
-    password: str
+    password: str   
 
 
 class BaseResponse(BaseModel):
