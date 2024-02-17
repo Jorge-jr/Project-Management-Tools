@@ -1,9 +1,14 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
+from datetime import datetime
 
 
 class WorkItemBase(BaseModel):
     title: str
-    description: str | None = None
+    description: str
+    deadline: datetime = None
+    initial_date: datetime = datetime.now()
+    finished_date: datetime = None
+    owner_id: int
 
 
 class WorkItemCreate(WorkItemBase):

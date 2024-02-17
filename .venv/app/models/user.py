@@ -12,4 +12,4 @@ class User(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
 
-    #items = relationship("Item", back_populates="owner")
+    work_items = relationship("WorkItem", back_populates="owner")

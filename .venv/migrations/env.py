@@ -10,7 +10,7 @@ from alembic import context
 from alembic import context
 from app.db.database import Base
 from app.models.user import User
-from app.models.work_item import WorkItem
+from app.models.work_item import WorkItem, Task, Epic, Feature
 
 
 
