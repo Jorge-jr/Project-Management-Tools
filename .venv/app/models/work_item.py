@@ -14,8 +14,22 @@ class WorkItem(Base):
     initial_date = Column(DateTime, index=True)
     finished_date = Column(DateTime, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
+    is_deleted = Column(Boolean, default=False)
 
     owner = relationship("User", back_populates="work_items")
+
+    def soft_delete(self):
+        self.is_deleted = True
+
+    def restore(self):
+        self.is_deleted = False
+
+    @classmethod
+    def get_all(cls, session, include_deleted=False):
+        if include_deleted:
+            return session.query(cls).all()
+        else:
+            return session.query(cls).filter(cls.is_deleted == False).all()
 
 class Task(WorkItem):
     __tablename__ = "tasks"

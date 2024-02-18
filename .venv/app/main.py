@@ -11,15 +11,25 @@ async def create_tables():
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-# Create FastAPI app
 app = FastAPI()
 
-# Include user_router
+
 app.include_router(user_router.router, prefix='/user', tags=["user"])
 app.include_router(auth_router.router, prefix='/auth', tags=["auth"])
 app.include_router(work_item_router.router, prefix='/work_item', tags=["work_item"])
 
-# Run create_tables coroutine when the app starts
 @app.on_event("startup")
 async def startup_event():
     await create_tables()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    # if env == 'testing': drop_tables()
+    pass
+
+# TODO: environment variables
+# TODO: implement soft delete for work_items and users
+# TODO: implement privileges (stakeholder, owner, admin, read-only)
+# TODO: implement hard delete for work_items and users (admin only)
+# TODO: create 'testing' environment (sqlite)
+# TODO: implement logger

@@ -1,13 +1,14 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class WorkItemBase(BaseModel):
     title: str
     description: str
     deadline: datetime = None
-    initial_date: datetime = datetime.now()
+    initial_date: datetime = datetime.now().replace(tzinfo=None)
     finished_date: datetime = None
+    is_deleted: bool = False
     owner_id: int
 
 

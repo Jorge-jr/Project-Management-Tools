@@ -21,7 +21,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-async def get_current_user(
+async def get_current_user_from_token(
     session: AsyncSession = Depends(get_session), token: str = Depends(reusable_oauth2)
 ) -> User:
     try:
