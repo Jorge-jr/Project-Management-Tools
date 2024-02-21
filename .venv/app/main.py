@@ -5,6 +5,7 @@ from app.api.endpoints import auth as auth_router
 from app.api.endpoints import work_item as work_item_router
 from app.db.database import Base
 from app.db.database import async_engine
+from fastapi.middleware.cors import CORSMiddleware
 
 
 async def create_tables():
@@ -12,6 +13,15 @@ async def create_tables():
         await conn.run_sync(Base.metadata.create_all)
 
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["POST", "GET", "DELETE", "PUT"],
+    allow_headers=["*"]
+)
 
 
 app.include_router(user_router.router, prefix='/user', tags=["user"])
@@ -33,3 +43,5 @@ async def shutdown_event():
 # TODO: implement hard delete for work_items and users (admin only)
 # TODO: create 'testing' environment (sqlite)
 # TODO: implement logger
+# TODO: implement users/me/work_items endpoint
+# TODO: implement users/{id}/work_items endpoint

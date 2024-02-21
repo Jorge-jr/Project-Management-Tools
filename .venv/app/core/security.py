@@ -24,7 +24,6 @@ class JWTTokenPayload(BaseModel):
     expires_at: int
 
 def generate_access_token_response(subject: str | int):
-    """Generate tokens and return AccessTokenResponse"""
     access_token, expires_at, issued_at = create_jwt_token(
         subject, settings.jwt_expire_minutes, refresh=False
     )

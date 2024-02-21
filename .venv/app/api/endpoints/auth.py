@@ -18,7 +18,7 @@ async def login_access_token(
     session: AsyncSession = Depends(deps.get_session),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
-    """OAuth2 compatible token, get an access token for future requests using username and password"""
+    print(form_data.username, form_data.password)
     result = await session.execute(select(User).where(User.email == form_data.username))
     user = result.scalars().first()
 

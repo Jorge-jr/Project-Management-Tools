@@ -1,26 +1,26 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime, timezone
+from typing import Optional
+from app.models.user import User
 
 
 class WorkItemBase(BaseModel):
     title: str
     description: str
-    deadline: datetime = None
-    initial_date: datetime = datetime.now().replace(tzinfo=None)
-    finished_date: datetime = None
+    deadline: Optional[datetime] = None
+    initial_date: datetime = datetime.now()
+    finished_date: Optional[datetime] = None
     is_deleted: bool = False
     owner_id: int
-
 
 class WorkItemCreate(WorkItemBase):
     pass
 
 class WorkItem(WorkItemBase):
     id: int
-    owner_id: int
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class BaseResponse(BaseModel):
@@ -28,4 +28,5 @@ class BaseResponse(BaseModel):
 
 class WorkItemResponse(BaseResponse):
     id: int
-    email: EmailStr
+    title: str
+    # owner_id: Optional[User]

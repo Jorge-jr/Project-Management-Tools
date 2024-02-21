@@ -54,3 +54,11 @@ async def register_new_user(
     session.add(user)
     await session.commit()
     return user
+
+@router.post("/delete/{user_id}")
+async def delete_user(
+        user_id: int,
+        session: AsyncSession = Depends(deps.get_session)
+):
+    user = await session.get(User, user_id)
+    await session.update(user, {"is_active": False})

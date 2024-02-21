@@ -2,20 +2,25 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.api import dependencies as deps
-
+from typing import List
 from app.schemas.work_item import WorkItemResponse, WorkItemCreate, WorkItemBase
 from app.models.work_item import WorkItem
 
 router = APIRouter()
 
 
-@router.get("/work_item_list", response_model=list[WorkItemResponse])
+@router.get("/work_item_list", response_model=List[WorkItemBase])
 async def read_work_items(session: AsyncSession = Depends(deps.get_session)):
     async with session.begin():
         query = select(WorkItem)
         result = await session.execute(query)
         work_items = result.scalars().all()
         return work_items
+
+@router.get("/work_item/{id}", response_model=WorkItemBase)
+async def read_work_item(id: int, session: AsyncSession = Depends(deps.get_session)):
+    work_item = await session.get(WorkItem, id)
+    return work_item
 
 @router.post("/new_work_item")
 async def create_work_item(
