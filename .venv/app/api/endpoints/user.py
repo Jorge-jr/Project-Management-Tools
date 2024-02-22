@@ -1,15 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.api import dependencies as deps
 from app.core.security import get_password_hash
 from app.models.user import User
+from app.models.work_item import WorkItem
 from app.schemas.user import UserCreateRequest, UserUpdatePasswordRequest, UserResponse
 
 
 router = APIRouter()
-
 
 @router.get("/me", response_model=UserResponse)
 async def read_current_user(
@@ -26,6 +25,12 @@ async def delete_current_user(
     await session.execute(delete(User).where(User.id == current_user.id))
     await session.commit()
 
+
+@router.post("/me/work_items")
+async def get_user_work_items(
+
+):
+    pass
 
 @router.post("/reset-password", response_model=UserResponse)
 async def reset_current_user_password(
@@ -50,6 +55,8 @@ async def register_new_user(
     user = User(
         email=new_user.email,
         hashed_password=get_password_hash(new_user.password),
+        name=new_user.name,
+        role=new_user.role
     )
     session.add(user)
     await session.commit()
@@ -61,4 +68,7 @@ async def delete_user(
         session: AsyncSession = Depends(deps.get_session)
 ):
     user = await session.get(User, user_id)
-    await session.update(user, {"is_active": False})
+    if user:
+        user.soft_delete()
+        await session.commit()
+        return {"message": f"User {user.name} deleted"}

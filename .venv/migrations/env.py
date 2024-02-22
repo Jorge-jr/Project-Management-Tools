@@ -11,8 +11,8 @@ from alembic import context
 from app.db.database import Base
 from app.models.user import User
 from app.models.work_item import WorkItem, Task, Epic, Feature
-
-
+from app.models.team import Team
+from app.models.user_team import user_team_association
 
 
 target_metadata = Base.metadata

@@ -1,7 +1,10 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Enum, DateTime
+from datetime import datetime
 from sqlalchemy.orm import relationship
-
+from app.models.user_role import UserRole
 from app.db.database import Base
+from app.models.team import Team
+from app.models.user_team import user_team_association
 
 
 class User(Base):
@@ -11,8 +14,17 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
+    name = Column(String)
+    username = Column(String, unique=True, index=True)
+    full_name = Column(String)
+    role = Column(Enum(UserRole), default=UserRole.VISITOR)
+    signup_date = Column(DateTime, default=datetime.utcnow)
 
     work_items = relationship("WorkItem", back_populates="owner")
+
+    teams = relationship("Team", secondary=user_team_association, back_populates="members")
+
+    managed_teams = relationship("Team", back_populates="manager")
 
 
     def soft_delete(self):
@@ -20,3 +32,6 @@ class User(Base):
 
     def restore(self):
         self.is_deleted = False
+
+
+
