@@ -22,7 +22,12 @@ class User(Base):
 
     work_items = relationship("WorkItem", back_populates="owner")
 
-    teams = relationship("Team", secondary=user_team_association, back_populates="members")
+    teams = relationship(
+        "Team",
+        secondary=user_team_association,
+        back_populates="members",
+        lazy='joined'
+    )
 
     managed_teams = relationship("Team", back_populates="manager")
 

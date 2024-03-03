@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime, timezone
 from typing import Optional
-from app.models.user import User
+
 
 
 class WorkItemBase(BaseModel):
@@ -11,7 +11,7 @@ class WorkItemBase(BaseModel):
     initial_date: datetime = datetime.now()
     finished_date: Optional[datetime] = None
     is_deleted: bool = False
-    owner_id: int
+    owner: dict
 
 class WorkItemCreate(WorkItemBase):
     pass

@@ -6,8 +6,6 @@ from app.models.user_role import UserRole
 class UserBase(BaseModel):
     email: str
 
-
-
 class UserCreate(UserBase):
     password: str
 
