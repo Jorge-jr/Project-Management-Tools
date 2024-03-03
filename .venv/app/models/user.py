@@ -20,7 +20,11 @@ class User(Base):
     role = Column(Enum(UserRole), default=UserRole.VISITOR)
     signup_date = Column(DateTime, default=datetime.utcnow)
 
-    work_items = relationship("WorkItem", back_populates="owner")
+    work_items = relationship(
+        "WorkItem",
+        back_populates="owner",
+        lazy="joined"
+    )
 
     teams = relationship(
         "Team",

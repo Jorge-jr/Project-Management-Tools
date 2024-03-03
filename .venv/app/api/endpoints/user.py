@@ -72,3 +72,19 @@ async def delete_user(
         user.soft_delete()
         await session.commit()
         return {"message": f"User {user.name} deleted"}
+
+@router.get("/{id}")
+async def get_user(
+        id: int,
+        session: AsyncSession = Depends(deps.get_session)
+):
+    user = await session.get(User, id)
+    return {
+        "email": user.email,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role,
+        "teams": {team.id: team.name for team in user.teams},
+        "work_items": {work_item.id: work_item.title for work_item in user.work_items},
+        "full_name": user.full_name
+    }

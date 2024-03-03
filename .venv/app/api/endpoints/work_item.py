@@ -21,7 +21,7 @@ async def read_work_items(session: AsyncSession = Depends(deps.get_session)):
         work_items = result.scalars().all()
         return work_items
 
-@router.get("/work_item/{id}", response_model=WorkItemBase)
+@router.get("/{id}", response_model=WorkItemBase)
 async def read_work_item(id: int, session: AsyncSession = Depends(deps.get_session)):
     query = select(WorkItem, User, Team).\
         join(User, WorkItem.owner_id == User.id).\
@@ -44,7 +44,8 @@ async def read_work_item(id: int, session: AsyncSession = Depends(deps.get_sessi
         "owner": {
             "id": owner.id,
             "email": owner.email,
-            "teams": {team.id: team.name for team in owner.teams}
+            "teams": {team.id: team.name for team in owner.teams},
+            "name": owner.name
         }
     }
 
