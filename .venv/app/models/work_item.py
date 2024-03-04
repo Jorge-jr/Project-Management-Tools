@@ -24,12 +24,9 @@ class WorkItem(Base):
     def restore(self):
         self.is_deleted = False
 
-    @classmethod
-    def get_all(cls, session, include_deleted=False):
-        if include_deleted:
-            return session.query(cls).all()
-        else:
-            return session.query(cls).filter(cls.is_deleted == False).all()
+    def has_parents(self):
+        return False
+
 
 class Task(WorkItem):
     __tablename__ = "tasks"
@@ -42,6 +39,17 @@ class Task(WorkItem):
     epic_id = Column(Integer, ForeignKey('epics.id'))
     epic = relationship("Epic", back_populates="tasks", foreign_keys=[epic_id])
 
+    def has_parents(self):
+        return self.epic_id != None and self.feature_id != None
+
+    def get_parent_id(self):
+        parent_id = None
+        if self.epic_id:
+            parent_id = self.epic_id
+        elif self.feature_id:
+            parent_id = self.feature_id
+
+        return parent_id
 
 class Feature(WorkItem):
     __tablename__ = "features"
@@ -52,6 +60,18 @@ class Feature(WorkItem):
     epic = relationship("Epic", back_populates="features", foreign_keys=[epic_id])
 
     tasks = relationship("Task", foreign_keys=[Task.feature_id])
+
+    def has_parents(self):
+        return self.epic_id != None and self.feature_id != None
+
+    def get_parent_id(self):
+        parent_id = None
+        if self.epic_id:
+            parent_id = self.epic_id
+        elif self.feature_id:
+            parent_id = self.feature_id
+
+        return parent_id
 
 
 class Epic(WorkItem):

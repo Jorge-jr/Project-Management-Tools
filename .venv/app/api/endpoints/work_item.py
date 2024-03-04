@@ -21,19 +21,27 @@ async def read_work_items(session: AsyncSession = Depends(deps.get_session)):
         work_items = result.scalars().all()
         return work_items
 
+
 @router.get("/{id}", response_model=WorkItemBase)
-async def read_work_item(id: int, session: AsyncSession = Depends(deps.get_session)):
+async def get_work_item(id: int, session: AsyncSession = Depends(deps.get_session)):
+
     query = select(WorkItem, User, Team).\
         join(User, WorkItem.owner_id == User.id).\
         join(user_team_association, User.id == user_team_association.c.user_id).\
         join(Team, Team.id == user_team_association.c.team_id).\
         filter(WorkItem.id == id)
 
-    # Execute the query
     result = await session.execute(query)
-
-    # Fetch the first result
     work_item, owner, team = result.first()
+    parent_data = {}
+    if work_item.has_parents():
+        parent = await session.get(WorkItem, work_item.get_parent_id())
+        parent_data["parent_title"] = parent.title
+        parent_data["parent_id"] = parent.id,
+        parent_data["parent_initial_date"] = parent.initial_date,
+        parent_data["parent_finished_date"] =  parent.finished_date,
+        parent_data["parent_deadline"] = parent.deadline
+
     return {
         "title": work_item.title,
         "description": work_item.description,
@@ -46,8 +54,10 @@ async def read_work_item(id: int, session: AsyncSession = Depends(deps.get_sessi
             "email": owner.email,
             "teams": {team.id: team.name for team in owner.teams},
             "name": owner.name
-        }
+        },
+        "parent": parent_data
     }
+
 
 @router.post("/new_work_item")
 async def create_work_item(
@@ -58,6 +68,7 @@ async def create_work_item(
     session.add(new_work_item)
     await session.commit()
     return work_item
+
 
 @router.post("/delete/{id}")
 async def delete_work_item(
