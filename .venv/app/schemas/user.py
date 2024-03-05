@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
-from .work_item import WorkItem
+from .work_item import WorkItemResponse
 from app.models.user_role import UserRole
 
 
@@ -13,7 +13,7 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     is_active: bool
-    work_items: list[WorkItem] = []
+    work_items: list[WorkItemResponse] = []
 
     class Config:
         from_attributes = True

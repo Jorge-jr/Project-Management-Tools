@@ -3,17 +3,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.api import dependencies as deps
 from typing import List
-from app.schemas.work_item import WorkItemResponse, WorkItemCreate, WorkItemBase
+from app.schemas.work_item import WorkItemResponse, WorkItemCreate
 from app.models.work_item import WorkItem
 from app.models.user import User
 from app.models.team import Team
 from app.models.user import user_team_association
+from app.models.work_item_factory import *
 
 
 router = APIRouter()
 
 
-@router.get("/work_item_list", response_model=List[WorkItemBase])
+@router.get("/work_item_list", response_model=List[WorkItemResponse])
 async def read_work_items(session: AsyncSession = Depends(deps.get_session)):
     async with session.begin():
         query = select(WorkItem)
@@ -22,7 +23,7 @@ async def read_work_items(session: AsyncSession = Depends(deps.get_session)):
         return work_items
 
 
-@router.get("/{id}", response_model=WorkItemBase)
+@router.get("/{id}", response_model=WorkItemResponse)
 async def get_work_item(id: int, session: AsyncSession = Depends(deps.get_session)):
 
     query = select(WorkItem, User, Team).\
@@ -61,13 +62,26 @@ async def get_work_item(id: int, session: AsyncSession = Depends(deps.get_sessio
 
 @router.post("/new_work_item")
 async def create_work_item(
-        work_item: WorkItemBase,
+        work_item: WorkItemCreate,
+        work_item_type: str,
         session: AsyncSession = Depends(deps.get_session),
 ):
-    new_work_item = WorkItem(**work_item.dict())
+    if work_item_type not in ["Task", "Epic", "Feature"]:
+        raise HTTPException(status_code=400, detail="Invalid work item type")
+
+    if work_item_type == "Task":
+        factory = TaskFactory()
+    elif work_item_type == "Epic":
+        factory = EpicFactory()
+    elif work_item_type == "Feature":
+        factory = FeatureFactory()
+
+    new_work_item = factory.create_work_item(work_item.dict())
+
     session.add(new_work_item)
     await session.commit()
-    return work_item
+
+    return new_work_item
 
 
 @router.post("/delete/{id}")

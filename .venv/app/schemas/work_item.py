@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from typing import Optional
 
 
-
 class WorkItemBase(BaseModel):
     title: str
     description: str
@@ -11,13 +10,14 @@ class WorkItemBase(BaseModel):
     initial_date: datetime = datetime.now()
     finished_date: Optional[datetime] = None
     is_deleted: bool = False
-    owner: dict
+
 
 class WorkItemCreate(WorkItemBase):
-    pass
+    owner_id: int
 
-class WorkItem(WorkItemBase):
-    id: int
+
+class WorkItemResponse(WorkItemBase):
+    owner: dict
 
     class Config:
         orm_mode = True
@@ -25,6 +25,7 @@ class WorkItem(WorkItemBase):
 
 class BaseResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+
 
 class WorkItemResponse(BaseResponse):
     id: int
