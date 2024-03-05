@@ -10,6 +10,7 @@ class WorkItemBase(BaseModel):
     initial_date: datetime = datetime.now()
     finished_date: Optional[datetime] = None
     is_deleted: bool = False
+    owner_id: int
 
 
 class WorkItemCreate(WorkItemBase):
@@ -17,6 +18,12 @@ class WorkItemCreate(WorkItemBase):
 
 
 class WorkItemResponse(WorkItemBase):
+    title: str
+    description: str
+    deadline: Optional[datetime] = None
+    initial_date: datetime = datetime.now()
+    finished_date: Optional[datetime] = None
+    is_deleted: bool = False
     owner: dict
 
     class Config:
@@ -26,8 +33,3 @@ class WorkItemResponse(WorkItemBase):
 class BaseResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-
-class WorkItemResponse(BaseResponse):
-    id: int
-    title: str
-    # owner_id: Optional[User]
