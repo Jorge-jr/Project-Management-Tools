@@ -45,8 +45,7 @@ async def shutdown_event():
 # TODO: implement hard delete for work_items and users (admin only)
 # TODO: create 'testing' environment (sqlite)
 # TODO: implement logger
-# TODO: implement users/me/work_items endpoint
-# TODO: implement users/{id}/work_items endpoint
+# TODO: Test invalid token scenarios
 
 
 """

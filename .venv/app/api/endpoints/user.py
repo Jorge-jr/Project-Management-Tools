@@ -90,3 +90,12 @@ async def get_user(
         "work_items": {work_item.id: work_item.title for work_item in user.work_items},
         "full_name": user.full_name
     }
+
+@router.post("/{id}/work_items")
+async def get_user_work_items(
+        id:int,
+        current_user: User = Depends(deps.get_current_user_from_token),
+        session: AsyncSession = Depends(deps.get_session)
+):
+    user = await session.get(User, id)
+    return current_user.work_items
