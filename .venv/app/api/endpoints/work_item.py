@@ -15,12 +15,13 @@ router = APIRouter()
 
 
 @router.get("/work_item_list", response_model=List[WorkItemBase])
-async def read_work_items(session: AsyncSession = Depends(deps.get_session)):
-    async with session.begin():
-        query = select(WorkItem)
-        result = await session.execute(query)
-        work_items = result.scalars().all()
-        return work_items
+async def read_work_items(
+        session: AsyncSession = Depends(deps.get_session),
+        current_user: User = Depends(deps.get_current_user_from_token)
+):
+    result = await session.execute(select(WorkItem))
+    work_items = result.scalars().all()
+    return work_items
 
 
 @router.get("/{id}", response_model=WorkItemResponse)
