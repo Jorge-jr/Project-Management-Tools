@@ -1,7 +1,7 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum
 from sqlalchemy.orm import relationship
-
 from app.db.database import Base
+from app.models.work_item_status_enum import WorkItemStatus
 
 
 class WorkItem(Base):
@@ -15,6 +15,7 @@ class WorkItem(Base):
     finished_date = Column(DateTime, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
     is_deleted = Column(Boolean, default=False)
+    status = Column(Enum(WorkItemStatus), default=WorkItemStatus.NEW)
 
     owner = relationship("User", back_populates="work_items")
 
@@ -40,7 +41,7 @@ class Task(WorkItem):
     epic = relationship("Epic", back_populates="tasks", foreign_keys=[epic_id])
 
     def has_parents(self):
-        return self.epic_id != None and self.feature_id != None
+        return None != self.epic_id and None != self.feature_id
 
     def get_parent_id(self):
         parent_id = None
@@ -50,6 +51,7 @@ class Task(WorkItem):
             parent_id = self.feature_id
 
         return parent_id
+
 
 class Feature(WorkItem):
     __tablename__ = "features"
@@ -62,7 +64,7 @@ class Feature(WorkItem):
     tasks = relationship("Task", foreign_keys=[Task.feature_id])
 
     def has_parents(self):
-        return self.epic_id != None and self.feature_id != None
+        return None != self.epic_id and None != self.feature_id
 
     def get_parent_id(self):
         parent_id = None

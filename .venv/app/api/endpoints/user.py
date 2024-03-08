@@ -28,9 +28,11 @@ async def delete_current_user(
 
 @router.post("/me/work_items")
 async def get_user_work_items(
-
+    current_user: User = Depends(deps.get_current_user_from_token),
+    session: AsyncSession = Depends(deps.get_session)
 ):
-    pass
+
+    return current_user.work_items
 
 @router.post("/reset-password", response_model=UserResponse)
 async def reset_current_user_password(
