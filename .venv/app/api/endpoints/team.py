@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.team import TeamCreateRequest
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 from app.api import dependencies as deps
 from app.models.user import User
 from app.models.user_role import UserRole
@@ -10,6 +9,7 @@ from app.models.team import Team
 
 
 router = APIRouter()
+
 
 @router.post("/new")
 async def create_team(
@@ -29,6 +29,8 @@ async def create_team(
 
     return {"message": f"Successfully created team {new_team.name}"}
 
+
+# noinspection PyPackageRequirements
 @router.get("/teams")
 async def get_teams(
         current_user: User = Depends(deps.get_current_user_from_token),
@@ -38,13 +40,14 @@ async def get_teams(
     teams = result.scalars().all()
     return teams
 
+
 @router.get("/{id}")
 async def get_team_by_id(
-        id: int,
+        team_id: int,
         current_user: User = Depends(deps.get_current_user_from_token),
         session: User = Depends(deps.get_session)
 ):
-    team = await session.get(Team, id)
+    team = await session.get(Team, team_id)
     if not team:
         raise HTTPException(status_code=404, detail="Team not found")
     return team

@@ -10,6 +10,7 @@ from app.schemas.user import UserCreateRequest, UserUpdatePasswordRequest, UserR
 
 router = APIRouter()
 
+
 @router.get("/me", response_model=UserResponse)
 async def read_current_user(
     current_user: User = Depends(deps.get_current_user_from_token),
@@ -26,13 +27,13 @@ async def delete_current_user(
     await session.commit()
 
 
-@router.post("/me/work_items")
+@router.get("/me/work_items")
 async def get_user_work_items(
     current_user: User = Depends(deps.get_current_user_from_token),
     session: AsyncSession = Depends(deps.get_session)
 ):
+    return {"items": current_user.work_items, "user_name": current_user.name}
 
-    return current_user.work_items
 
 @router.post("/reset-password", response_model=UserResponse)
 async def reset_current_user_password(
@@ -64,6 +65,7 @@ async def register_new_user(
     await session.commit()
     return user
 
+
 @router.post("/delete/{user_id}")
 async def delete_user(
         user_id: int,
@@ -75,21 +77,22 @@ async def delete_user(
         await session.commit()
         return {"message": f"User {user.name} deleted"}
 
-@router.get("/{id}")
+
+@router.get("/{user_id}")
 async def get_user(
-        id: int,
+        user_id: int,
         session: AsyncSession = Depends(deps.get_session)
 ):
-    user = await session.get(User, id)
+    user = await session.get(User, user_id)
     return {
         "email": user.email,
         "name": user.name,
-        "email": user.email,
         "role": user.role,
         "teams": {team.id: team.name for team in user.teams},
         "work_items": {work_item.id: work_item.title for work_item in user.work_items},
         "full_name": user.full_name
     }
+
 
 @router.post("/{id}/work_items")
 async def get_user_work_items(

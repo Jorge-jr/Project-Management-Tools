@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum
 from sqlalchemy.orm import relationship
 from app.db.database import Base
-from app.models.work_item_status_enum import WorkItemStatus
+from app.models.work_item_enums import WorkItemStatus, WorkItemType
 
 
 class WorkItem(Base):
@@ -16,6 +16,7 @@ class WorkItem(Base):
     owner_id = Column(Integer, ForeignKey("users.id"))
     is_deleted = Column(Boolean, default=False)
     status = Column(Enum(WorkItemStatus), default=WorkItemStatus.NEW)
+    type = Column(Enum(WorkItemType), default=WorkItemType.TASK)
 
     owner = relationship("User", back_populates="work_items")
 

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime, timezone
 from typing import Optional
+from app.models.work_item_enums import WorkItemStatus, WorkItemType
 
 
 class WorkItemBase(BaseModel):
@@ -11,6 +12,8 @@ class WorkItemBase(BaseModel):
     finished_date: Optional[datetime] = None
     is_deleted: bool = False
     owner_id: int
+    type: WorkItemType
+    status: WorkItemStatus = WorkItemStatus.NEW
 
 
 class WorkItemCreate(WorkItemBase):

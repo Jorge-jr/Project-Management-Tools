@@ -18,6 +18,7 @@ class User(UserBase):
     class Config:
         from_attributes = True
 
+
 class BaseRequest(BaseModel):
     # may define additional fields or config shared across requests
     pass
@@ -39,7 +40,6 @@ class UserCreateRequest(BaseRequest):
     role: UserRole
 
 
-
 class BaseResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -57,3 +57,4 @@ class AccessTokenResponse(BaseResponse):
 class UserResponse(BaseResponse):
     id: int
     email: EmailStr
+    name: str

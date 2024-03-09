@@ -13,12 +13,12 @@ from app.schemas.user import RefreshTokenRequest, AccessTokenResponse
 
 router = APIRouter()
 
+
 @router.post("/access-token", response_model=AccessTokenResponse)
 async def login_access_token(
     session: AsyncSession = Depends(deps.get_session),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
-    print(form_data.username, form_data.password)
     result = await session.execute(select(User).where(User.email == form_data.username))
     user = result.scalars().first()
 
