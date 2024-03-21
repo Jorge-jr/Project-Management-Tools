@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
-from app.schemas.team import TeamCreateRequest
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import dependencies as deps
+from app.models.team import Team
 from app.models.user import User
 from app.models.user_role import UserRole
+from app.schemas.team import TeamCreateRequest
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
-from app.models.team import Team
-
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 
@@ -17,7 +16,6 @@ async def create_team(
         current_user: User = Depends(deps.get_current_user_from_token),
         session: AsyncSession = Depends(deps.get_session)
 ):
-
     manager = await session.get(User, new_team_request.manager_id)
     if not manager:
         return {"message": f"Manager not found"}

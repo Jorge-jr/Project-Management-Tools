@@ -1,16 +1,12 @@
-from typing import Union
-
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
-from passlib.context import CryptContext
-from app.core.config import settings
-#from app.api.models.user import UserOut
-from sqlalchemy.orm import Session
+# from app.api.models.user import UserOut
 import time
-from app.schemas.user import AccessTokenResponse
-from pydantic import BaseModel
 
+from app.core.config import settings
+from app.schemas.user import AccessTokenResponse
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt
+from passlib.context import CryptContext
+from pydantic import BaseModel
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -22,6 +18,7 @@ class JWTTokenPayload(BaseModel):
     refresh: bool
     issued_at: int
     expires_at: int
+
 
 def generate_access_token_response(subject: str | int):
     access_token, expires_at, issued_at = create_jwt_token(
@@ -40,12 +37,14 @@ def generate_access_token_response(subject: str | int):
         refresh_token_issued_at=refresh_issued_at,
     )
 
+
 '''def create_access_token(data: dict) -> str:
     to_encode = data.copy()
     expires = datetime.utcnow() + timedelta(minutes=settings.jwt_expire_minutes)
     to_encode.update({"exp": expires})
     encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
     return encoded_jwt'''
+
 
 def create_jwt_token(subject: str | int, exp_secs: int, refresh: bool):
     """Creates jwt access or refresh token for user.
@@ -75,6 +74,7 @@ def create_jwt_token(subject: str | int, exp_secs: int, refresh: bool):
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
+
 
 def get_password_hash(password):
     return pwd_context.hash(password)

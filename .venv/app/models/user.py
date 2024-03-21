@@ -1,10 +1,10 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Enum, DateTime
 from datetime import datetime
-from sqlalchemy.orm import relationship
-from app.models.user_role import UserRole
 from app.db.database import Base
-from app.models.team import Team
+from app.models.user_role import UserRole
 from app.models.user_team import user_team_association
+from app.models.work_items_contributors import work_item_contributors
+from sqlalchemy import Boolean, Column, Integer, String, Enum, DateTime
+from sqlalchemy.orm import relationship
 
 
 class User(Base):
@@ -22,7 +22,14 @@ class User(Base):
 
     work_items = relationship(
         "WorkItem",
-        back_populates="owner",
+        back_populates="driver",
+        lazy="joined"
+    )
+
+    contributing_work_items = relationship(
+        "WorkItem",
+        secondary=work_item_contributors,
+        back_populates="contributors",
         lazy="joined"
     )
 
@@ -35,12 +42,8 @@ class User(Base):
 
     managed_teams = relationship("Team", back_populates="manager")
 
-
     def soft_delete(self):
         self.is_deleted = True
 
     def restore(self):
         self.is_deleted = False
-
-
-

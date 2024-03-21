@@ -1,23 +1,23 @@
 import time
+
 import jwt
+from app.api import dependencies as deps
+from app.core import config, security
+from app.models.user import User
+from app.schemas.user import RefreshTokenRequest, AccessTokenResponse
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api import dependencies as deps
-from app.core import config, security
-from app.models.user import User
-from app.schemas.user import RefreshTokenRequest, AccessTokenResponse
-
 
 router = APIRouter()
 
 
 @router.post("/access-token", response_model=AccessTokenResponse)
 async def login_access_token(
-    session: AsyncSession = Depends(deps.get_session),
-    form_data: OAuth2PasswordRequestForm = Depends(),
+        session: AsyncSession = Depends(deps.get_session),
+        form_data: OAuth2PasswordRequestForm = Depends(),
 ):
     result = await session.execute(select(User).where(User.email == form_data.username))
     user = result.scalars().first()
@@ -33,8 +33,8 @@ async def login_access_token(
 
 @router.post("/refresh-token", response_model=AccessTokenResponse)
 async def refresh_token(
-    input: RefreshTokenRequest,
-    session: AsyncSession = Depends(deps.get_session),
+        input: RefreshTokenRequest,
+        session: AsyncSession = Depends(deps.get_session),
 ):
     """OAuth2 compatible token, get an access token for future requests using refresh token"""
     try:

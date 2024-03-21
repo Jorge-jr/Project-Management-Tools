@@ -1,6 +1,6 @@
-from sqlalchemy import Table, ForeignKey, Column, Integer, Enum
-from app.models.user_role import UserRole
 from app.db.database import Base
+from app.models.user_role import UserRole
+from sqlalchemy import Table, ForeignKey, Column, Enum
 
 user_team_association = Table(
     "user_team_association",

@@ -1,9 +1,7 @@
-from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, ForeignKey
-from enum import Enum
 from app.db.database import Base
 from app.models.user_team import user_team_association
-from app.models.user_role import UserRole
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 
 
 class Team(Base):

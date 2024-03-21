@@ -6,5 +6,6 @@ class Team(BaseModel):
     name: str
     manager_id: int
 
+
 class TeamCreateRequest(Team):
     manager_id: int

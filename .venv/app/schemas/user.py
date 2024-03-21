@@ -1,10 +1,11 @@
+from app.models.user_role import UserRole
 from pydantic import BaseModel, EmailStr, ConfigDict
 from .work_item import WorkItemResponse
-from app.models.user_role import UserRole
 
 
 class UserBase(BaseModel):
     email: str
+
 
 class UserCreate(UserBase):
     password: str
@@ -58,3 +59,6 @@ class UserResponse(BaseResponse):
     id: int
     email: EmailStr
     name: str
+
+class Contributors(BaseModel):
+    contributors: list[int] = []

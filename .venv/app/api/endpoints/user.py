@@ -1,27 +1,27 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import delete, select
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import dependencies as deps
 from app.core.security import get_password_hash
 from app.models.user import User
-from app.models.work_item import WorkItem
+from app.models.work_item import *
+from app.models.work_item_enums import WorkItemType
 from app.schemas.user import UserCreateRequest, UserUpdatePasswordRequest, UserResponse
-
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 
 
 @router.get("/me", response_model=UserResponse)
 async def read_current_user(
-    current_user: User = Depends(deps.get_current_user_from_token),
+        current_user: User = Depends(deps.get_current_user_from_token),
 ):
     return current_user
 
 
 @router.delete("/me", status_code=204)
 async def delete_current_user(
-    current_user: User = Depends(deps.get_current_user_from_token),
-    session: AsyncSession = Depends(deps.get_session),
+        current_user: User = Depends(deps.get_current_user_from_token),
+        session: AsyncSession = Depends(deps.get_session),
 ):
     await session.execute(delete(User).where(User.id == current_user.id))
     await session.commit()
@@ -29,17 +29,27 @@ async def delete_current_user(
 
 @router.get("/me/work_items")
 async def get_user_work_items(
-    current_user: User = Depends(deps.get_current_user_from_token),
-    session: AsyncSession = Depends(deps.get_session)
+        current_user: User = Depends(deps.get_current_user_from_token),
+        session: AsyncSession = Depends(deps.get_session)
 ):
-    return {"items": current_user.work_items, "user_name": current_user.name}
+    epics = filter(lambda item: item.type == WorkItemType.EPIC, current_user.work_items)
+    tasks = filter(lambda item: item.type == WorkItemType.TASK, current_user.work_items)
+    features = filter(lambda item: item.type == WorkItemType.FEATURE, current_user.work_items)
+
+    epics_list = [await session.get(Epic, epic.id) for epic in epics]
+    features_list = [await session.get(Feature, feature.id) for feature in features]
+    tasks_list = [await session.get(Task, task.id) for task in tasks]
+
+    items = {"epics": epics_list, "features": features_list, "tasks": tasks_list}
+
+    return {"items": items, "user_name": current_user.name}
 
 
 @router.post("/reset-password", response_model=UserResponse)
 async def reset_current_user_password(
-    user_update_password: UserUpdatePasswordRequest,
-    session: AsyncSession = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user_from_token),
+        user_update_password: UserUpdatePasswordRequest,
+        session: AsyncSession = Depends(deps.get_session),
+        current_user: User = Depends(deps.get_current_user_from_token),
 ):
     current_user.hashed_password = get_password_hash(user_update_password.password)
     session.add(current_user)
@@ -49,8 +59,8 @@ async def reset_current_user_password(
 
 @router.post("/register", response_model=UserResponse)
 async def register_new_user(
-    new_user: UserCreateRequest,
-    session: AsyncSession = Depends(deps.get_session),
+        new_user: UserCreateRequest,
+        session: AsyncSession = Depends(deps.get_session),
 ):
     result = await session.execute(select(User).where(User.email == new_user.email))
     if result.scalars().first() is not None:
@@ -96,7 +106,7 @@ async def get_user(
 
 @router.post("/{id}/work_items")
 async def get_user_work_items(
-        id:int,
+        id: int,
         current_user: User = Depends(deps.get_current_user_from_token),
         session: AsyncSession = Depends(deps.get_session)
 ):

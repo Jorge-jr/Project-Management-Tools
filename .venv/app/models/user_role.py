@@ -1,5 +1,6 @@
 from enum import IntEnum
 
+
 class UserRole(IntEnum):
     VISITOR = 0
     CLIENT = 1
