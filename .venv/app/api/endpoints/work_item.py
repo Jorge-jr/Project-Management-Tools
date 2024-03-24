@@ -16,7 +16,7 @@ router = APIRouter()
 
 WORK_ITEM_SUBCLASSES = {
     WorkItemType.TASK: Task,
-    WorkItemType.EPIC: Epic,
+    WorkItemType.project: project,
     WorkItemType.FEATURE: Feature
 }
 
@@ -62,13 +62,13 @@ async def create_work_item(
         session: AsyncSession = Depends(deps.get_session),
 ):
     try:
-        if work_item.type not in [WorkItemType.TASK, WorkItemType.EPIC, WorkItemType.FEATURE]:
+        if work_item.type not in [WorkItemType.TASK, WorkItemType.project, WorkItemType.FEATURE]:
             raise HTTPException(status_code=400, detail="Invalid work item type")
 
         if work_item.type == WorkItemType.TASK:
             factory = TaskFactory()
-        elif work_item.type == WorkItemType.EPIC:
-            factory = EpicFactory()
+        elif work_item.type == WorkItemType.project:
+            factory = projectFactory()
         elif work_item.type == WorkItemType.FEATURE:
             factory = FeatureFactory()
 

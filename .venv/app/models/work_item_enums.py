@@ -9,6 +9,6 @@ class WorkItemStatus(IntEnum):
 
 
 class WorkItemType(IntEnum):
-    EPIC = 2
+    project = 2
     FEATURE = 1
     TASK = 0

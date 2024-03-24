@@ -1,5 +1,5 @@
 from app.api.endpoints import auth as auth_router
-from app.api.endpoints import epic as epic_router
+from app.api.endpoints import project as project_router
 from app.api.endpoints import feature as feature_router
 from app.api.endpoints import task as task_router
 from app.api.endpoints import team as team_router
@@ -30,7 +30,7 @@ app.include_router(user_router.router, prefix='/user', tags=["user"])
 app.include_router(auth_router.router, prefix='/auth', tags=["auth"])
 app.include_router(work_item_router.router, prefix='/work_item', tags=["work_item"])
 app.include_router(team_router.router, prefix='/team', tags=["team"])
-app.include_router(epic_router.router, prefix='/epic', tags=["epic"])
+app.include_router(project_router.router, prefix='/project', tags=["project"])
 app.include_router(feature_router.router, prefix='/feature', tags=["feature"])
 app.include_router(task_router.router, prefix='/task', tags=["task"])
 

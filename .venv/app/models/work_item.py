@@ -52,16 +52,16 @@ class Task(WorkItem):
     feature_id = Column(Integer, ForeignKey("features.id"))
     feature = relationship("Feature", back_populates="tasks", foreign_keys=[feature_id])
 
-    epic_id = Column(Integer, ForeignKey('epics.id'))
-    epic = relationship("Epic", back_populates="tasks", foreign_keys=[epic_id])
+    project_id = Column(Integer, ForeignKey('projects.id'))
+    project = relationship("project", back_populates="tasks", foreign_keys=[project_id])
 
     def has_parents(self):
-        return None != self.epic_id and None != self.feature_id
+        return None != self.project_id and None != self.feature_id
 
     def get_parent_id(self):
         parent_id = None
-        if self.epic_id:
-            parent_id = self.epic_id
+        if self.project_id:
+            parent_id = self.project_id
         elif self.feature_id:
             parent_id = self.feature_id
 
@@ -73,8 +73,8 @@ class Feature(WorkItem):
 
     id = Column(Integer, ForeignKey("work_items.id"), primary_key=True)
 
-    epic_id = Column(Integer, ForeignKey('epics.id'))
-    epic = relationship("Epic", back_populates="features", foreign_keys=[epic_id])
+    project_id = Column(Integer, ForeignKey('projects.id'))
+    project = relationship("project", back_populates="features", foreign_keys=[project_id])
 
     tasks = relationship(
         "Task",
@@ -84,21 +84,21 @@ class Feature(WorkItem):
     )
 
     def has_parents(self):
-        return None != self.epic_id
+        return None != self.project_id
 
     def get_parent_id(self):
-        return self.epic_id
+        return self.project_id
 
     def get_children(self):
         return {"tasks": self.tasks}
 
 
-class Epic(WorkItem):
-    __tablename__ = "epics"
+class project(WorkItem):
+    __tablename__ = "projects"
 
     id = Column(Integer, ForeignKey("work_items.id"), primary_key=True)
-    features = relationship("Feature", back_populates="epic", foreign_keys=[Feature.epic_id], lazy="joined")
-    tasks = relationship("Task", back_populates="epic", foreign_keys=[Task.epic_id], lazy="joined")
+    features = relationship("Feature", back_populates="project", foreign_keys=[Feature.project_id], lazy="joined")
+    tasks = relationship("Task", back_populates="project", foreign_keys=[Task.project_id], lazy="joined")
 
     def get_children(self):
         return {"features": self.features, "tasks": self.tasks}

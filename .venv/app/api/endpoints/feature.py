@@ -9,24 +9,24 @@ from sqlalchemy.orm.exc import NoResultFound
 router = APIRouter()
 
 
-@router.post("/set_epic/")
-async def set_parent_epic(
+@router.post("/set_project/")
+async def set_parent_project(
         feature_id: int,
-        epic_id: int,
+        project_id: int,
         session: AsyncSession = Depends(deps.get_session),
         current_user: User = Depends(deps.get_current_user_from_token)
 ):
     try:
         feature = await session.get(Feature, feature_id)
-        epic = await session.get(Epic, epic_id)
+        project = await session.get(project, project_id)
 
         if current_user.role <= UserRole.ASSOCIATE and current_user.id != feature.driver_id:
             raise HTTPException(status_code=401, detail="Not authorized")
 
-        if not epic or not feature:
+        if not project or not feature:
             raise HTTPException(status_code=404, detail="not found")
 
-        feature.epic_id = epic_id
+        feature.project_id = project_id
         await session.commit()
         return {"message": f"Done"}
 

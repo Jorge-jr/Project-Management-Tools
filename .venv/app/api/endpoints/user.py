@@ -32,15 +32,15 @@ async def get_user_work_items(
         current_user: User = Depends(deps.get_current_user_from_token),
         session: AsyncSession = Depends(deps.get_session)
 ):
-    epics = filter(lambda item: item.type == WorkItemType.EPIC, current_user.work_items)
+    projects = filter(lambda item: item.type == WorkItemType.project, current_user.work_items)
     tasks = filter(lambda item: item.type == WorkItemType.TASK, current_user.work_items)
     features = filter(lambda item: item.type == WorkItemType.FEATURE, current_user.work_items)
 
-    epics_list = [await session.get(Epic, epic.id) for epic in epics]
+    projects_list = [await session.get(project, project.id) for project in projects]
     features_list = [await session.get(Feature, feature.id) for feature in features]
     tasks_list = [await session.get(Task, task.id) for task in tasks]
 
-    items = {"epics": epics_list, "features": features_list, "tasks": tasks_list}
+    items = {"projects": projects_list, "features": features_list, "tasks": tasks_list}
 
     return {"items": items, "user_name": current_user.name}
 
