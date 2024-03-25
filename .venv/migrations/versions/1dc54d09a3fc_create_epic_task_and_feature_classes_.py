@@ -1,4 +1,4 @@
-"""Create project, Task and Feature classes. Added columns deadline, initial_date and finished_date to WorkItem class
+"""Create project, Task and complex_task classes. Added columns deadline, initial_date and finished_date to WorkItem class
 
 Revision ID: 1dc54d09a3fc
 Revises: e6b8714c8b58
@@ -25,7 +25,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['id'], ['work_items.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('features',
+    op.create_table('complex_tasks',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id'], ['work_items.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -53,6 +53,6 @@ def downgrade() -> None:
     op.drop_column('work_items', 'initial_dated')
     op.drop_column('work_items', 'deadline')
     op.drop_table('tasks')
-    op.drop_table('features')
+    op.drop_table('complex_tasks')
     op.drop_table('projects')
     # ### end Alembic commands ###

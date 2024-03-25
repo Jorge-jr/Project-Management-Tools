@@ -9,6 +9,6 @@ class WorkItemStatus(IntEnum):
 
 
 class WorkItemType(IntEnum):
-    project = 2
-    FEATURE = 1
+    PROJECT = 2
+    COMPLEX_TASK = 1
     TASK = 0

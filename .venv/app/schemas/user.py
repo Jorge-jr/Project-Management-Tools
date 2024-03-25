@@ -4,17 +4,18 @@ from .work_item import WorkItemResponse
 
 
 class UserBase(BaseModel):
-    email: str
+    id: int
+    email: EmailStr
+    name: str
 
 
 class UserCreate(UserBase):
     password: str
 
 
-class User(UserBase):
-    id: int
+class UserResponse(UserBase):
     is_active: bool
-    work_items: list[WorkItemResponse] = []
+    work_items: "list[WorkItemResponse]"
 
     class Config:
         from_attributes = True
@@ -54,11 +55,6 @@ class AccessTokenResponse(BaseResponse):
     refresh_token_expires_at: int
     refresh_token_issued_at: int
 
-
-class UserResponse(BaseResponse):
-    id: int
-    email: EmailStr
-    name: str
 
 class Contributors(BaseModel):
     contributors: list[int] = []

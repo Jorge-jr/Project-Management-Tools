@@ -9,24 +9,24 @@ from sqlalchemy.orm.exc import NoResultFound
 router = APIRouter()
 
 
-@router.post("/set_project/")
+@router.post("/set_parent_project/")
 async def set_parent_project(
-        feature_id: int,
+        complex_task_id: int,
         project_id: int,
         session: AsyncSession = Depends(deps.get_session),
         current_user: User = Depends(deps.get_current_user_from_token)
 ):
     try:
-        feature = await session.get(Feature, feature_id)
-        project = await session.get(project, project_id)
+        complex_task = await session.get(ComplexTask, complex_task_id)
+        project = await session.get(Project, project_id)
 
-        if current_user.role <= UserRole.ASSOCIATE and current_user.id != feature.driver_id:
+        if current_user.role <= UserRole.ASSOCIATE and current_user.id != complex_task.driver_id:
             raise HTTPException(status_code=401, detail="Not authorized")
 
-        if not project or not feature:
+        if not project or not complex_task:
             raise HTTPException(status_code=404, detail="not found")
 
-        feature.project_id = project_id
+        complex_task.project_id = project_id
         await session.commit()
         return {"message": f"Done"}
 

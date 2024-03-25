@@ -16,7 +16,7 @@ class WorkItem(Base):
     finished_date = Column(DateTime, index=True)
     is_deleted = Column(Boolean, default=False)
     status = Column(Enum(WorkItemStatus), default=WorkItemStatus.NEW)
-    type = Column(Enum(WorkItemType), default=WorkItemType.TASK)
+    work_item_type = Column(Enum(WorkItemType), default=WorkItemType.TASK)
     driver_id = Column(Integer, ForeignKey("users.id"))
 
     driver = relationship("User", back_populates="work_items")
@@ -49,37 +49,37 @@ class Task(WorkItem):
 
     id = Column(Integer, ForeignKey("work_items.id"), primary_key=True)
 
-    feature_id = Column(Integer, ForeignKey("features.id"))
-    feature = relationship("Feature", back_populates="tasks", foreign_keys=[feature_id])
+    complex_task_id = Column(Integer, ForeignKey("complex_tasks.id"))
+    complex_task = relationship("ComplexTask", back_populates="tasks", foreign_keys=[complex_task_id])
 
     project_id = Column(Integer, ForeignKey('projects.id'))
-    project = relationship("project", back_populates="tasks", foreign_keys=[project_id])
+    project = relationship("Project", back_populates="tasks", foreign_keys=[project_id])
 
     def has_parents(self):
-        return None != self.project_id and None != self.feature_id
+        return None != self.project_id and None != self.complex_task_id
 
     def get_parent_id(self):
         parent_id = None
         if self.project_id:
             parent_id = self.project_id
-        elif self.feature_id:
-            parent_id = self.feature_id
+        elif self.complex_task_id:
+            parent_id = self.complex_task_id
 
         return parent_id
 
 
-class Feature(WorkItem):
-    __tablename__ = "features"
+class ComplexTask(WorkItem):
+    __tablename__ = "complex_tasks"
 
     id = Column(Integer, ForeignKey("work_items.id"), primary_key=True)
 
     project_id = Column(Integer, ForeignKey('projects.id'))
-    project = relationship("project", back_populates="features", foreign_keys=[project_id])
+    project = relationship("Project", back_populates="complex_tasks", foreign_keys=[project_id])
 
     tasks = relationship(
         "Task",
-        back_populates="feature",
-        foreign_keys=[Task.feature_id],
+        back_populates="complex_task",
+        foreign_keys=[Task.complex_task_id],
         lazy="joined"
     )
 
@@ -93,12 +93,12 @@ class Feature(WorkItem):
         return {"tasks": self.tasks}
 
 
-class project(WorkItem):
+class Project(WorkItem):
     __tablename__ = "projects"
 
     id = Column(Integer, ForeignKey("work_items.id"), primary_key=True)
-    features = relationship("Feature", back_populates="project", foreign_keys=[Feature.project_id], lazy="joined")
+    complex_tasks = relationship("ComplexTask", back_populates="project", foreign_keys=[ComplexTask.project_id], lazy="joined")
     tasks = relationship("Task", back_populates="project", foreign_keys=[Task.project_id], lazy="joined")
 
     def get_children(self):
-        return {"features": self.features, "tasks": self.tasks}
+        return {"complex_tasks": self.complex_tasks, "tasks": self.tasks}

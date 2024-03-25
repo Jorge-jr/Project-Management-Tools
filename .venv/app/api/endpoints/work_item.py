@@ -11,73 +11,85 @@ from app.schemas.user import Contributors
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from datetime import datetime
+
 
 router = APIRouter()
 
 WORK_ITEM_SUBCLASSES = {
     WorkItemType.TASK: Task,
-    WorkItemType.project: project,
-    WorkItemType.FEATURE: Feature
+    WorkItemType.PROJECT: Project,
+    WorkItemType.COMPLEX_TASK: ComplexTask
 }
 
 
-@router.get("/work_item_list", response_model=List[WorkItemBase])
+def prepare_work_item_response(item: WorkItem) -> dict:
+    new_item = {
+        "id": item.id,
+        "title": item.title,
+        "description": item.description,
+        "due_date": item.due_date,
+        "status": item.status,
+        "contributors": [contributors.id for contributors in item.contributors],
+        "initial_date": item.initial_date,
+        "finished_date": item.finished_date,
+        "driver_id": item.driver_id,
+        "parent_id": item.get_parent_id(),
+        "children_ids": item.get_children()
+    }
+    return new_item
+
+
+@router.get("/work_item_list")
 async def read_work_items(
         session: AsyncSession = Depends(deps.get_session),
         current_user: User = Depends(deps.get_current_user_from_token)
 ):
     result = await session.execute(select(WorkItem))
     work_items = result.scalars().unique().all()
-    return work_items
+    response = []
+
+    for item in work_items:
+        response.append(prepare_work_item_response(item))
+
+    return response
 
 
 @router.get("/{id}")
 async def get_work_item(id: int, session: AsyncSession = Depends(deps.get_session)):
+
     work_item = await session.get(WorkItem, id)
-
-    work_item_type_class = WORK_ITEM_SUBCLASSES[work_item.type]
-
-    query = select(work_item_type_class, User, Team). \
-        join(User, work_item_type_class.driver_id == User.id). \
-        join(user_team_association, User.id == user_team_association.c.user_id). \
-        join(Team, Team.id == user_team_association.c.team_id). \
-        filter(work_item_type_class.id == id)
-
-    query_result = await session.execute(query)
-    result = query_result.first()
-
-    if not result:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-    item, driver, team = result
-    parent_id = item.get_parent_id()
-    children = item.get_children()
-
-    return {"item": item, "driver": driver}
+    return  prepare_work_item_response(work_item)
 
 
 @router.post("/new_work_item")
 async def create_work_item(
         work_item: WorkItemCreate,
+        factory: WorkItemFactory = Depends(deps.get_work_item_factory),
         session: AsyncSession = Depends(deps.get_session),
 ):
     try:
-        if work_item.type not in [WorkItemType.TASK, WorkItemType.project, WorkItemType.FEATURE]:
-            raise HTTPException(status_code=400, detail="Invalid work item type")
+        # Use the factory to create the new work item asynchronously
+        new_work_item_data = {key: value for key, value in work_item.dict().items() if
+                              key not in ["parent", "contributors"]}
+        new_work_item = await factory.create_work_item(new_work_item_data)
 
-        if work_item.type == WorkItemType.TASK:
-            factory = TaskFactory()
-        elif work_item.type == WorkItemType.project:
-            factory = projectFactory()
-        elif work_item.type == WorkItemType.FEATURE:
-            factory = FeatureFactory()
-
-        new_work_item = factory.create_work_item(work_item.dict())
+        # Set the parent if provided
+        if 'parent' in work_item.dict():
+            parent = await session.get(WorkItem, work_item.dict()['parent'])
+            if parent is None:
+                raise ValueError(f"Parent with ID {work_item.dict()['parent']} not found")
+            if parent.work_item_type == WorkItemType.PROJECT:
+                new_work_item.project_id = parent.id
+            elif parent.work_item_type == WorkItemType.COMPLEX_TASK:
+                new_work_item.complex_task_id = parent.id
+            else:
+                raise ValueError("Invalid parent type.")
 
         session.add(new_work_item)
         await session.commit()
 
-        return new_work_item
+        return {"new_item_id": new_work_item.id, "message": "Successfully created a new work item"}
     except Exception as e:
         # Log the error for debugging purposes
         print(f"An error occurred: {e}")
@@ -115,3 +127,43 @@ async def add_contributors_to_work_item(
 
     await session.commit()
     return {"message": "Contributors added successfully"}
+
+
+@router.get("/set_due_date/{work_item_id}/")
+async def set_due_date(
+    new_due_date: datetime,
+    work_item_id: int,
+    session: AsyncSession = Depends(deps.get_session)
+):
+    work_item = await session.get(WorkItem, work_item_id)
+    if not work_item:
+        raise HTTPException(status_code=404, detail="Work item not found")
+
+    if new_due_date < datetime.now():
+        raise HTTPException(status_code=403, detail="Due date cannot be greater than current date")
+
+    work_item.due_date = new_due_date
+    await session.commit()
+
+    return {"message": "Due date updated successfully"}
+
+
+@router.get("/close_work_item/{work_item_id}/")
+async def close_work_item(
+        user_id: int,
+        work_item_id: int,
+        session: AsyncSession = Depends(deps.get_session),
+        finished_date: datetime = datetime.utcnow()
+):
+    work_item = await session.get(WorkItem, work_item_id)
+    user = await session.get(User, user_id)
+
+    if not work_item:
+        raise HTTPException(status_code=400, detail="Work item not found")
+
+    if not user:
+        raise HTTPException(status_code=400, detail="User does not exist")
+
+    work_item.finished_date = finished_date
+    await session.commit()
+    return {"message": "Work item closed successfully"}

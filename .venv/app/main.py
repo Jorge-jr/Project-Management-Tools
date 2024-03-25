@@ -1,6 +1,6 @@
 from app.api.endpoints import auth as auth_router
 from app.api.endpoints import project as project_router
-from app.api.endpoints import feature as feature_router
+from app.api.endpoints import complex_task as complex_task_router
 from app.api.endpoints import task as task_router
 from app.api.endpoints import team as team_router
 from app.api.endpoints import user as user_router
@@ -31,7 +31,7 @@ app.include_router(auth_router.router, prefix='/auth', tags=["auth"])
 app.include_router(work_item_router.router, prefix='/work_item', tags=["work_item"])
 app.include_router(team_router.router, prefix='/team', tags=["team"])
 app.include_router(project_router.router, prefix='/project', tags=["project"])
-app.include_router(feature_router.router, prefix='/feature', tags=["feature"])
+app.include_router(complex_task_router.router, prefix='/complex_task', tags=["complex_task"])
 app.include_router(task_router.router, prefix='/task', tags=["task"])
 
 
@@ -47,10 +47,10 @@ async def shutdown_event():
 
 
 # TODO: environment variables
-# TODO: implement work_item.set_due_date and work_item.set_finished_date
 # TODO: implement privileges (stakeholder, driver, admin, read-only)
 # TODO: implement hard delete for work_items and users (admin only)
 # TODO: create 'testing' environment (sqlite)
 # TODO: implement logger
 # TODO: Test invalid token scenarios
-# TODO: remove hashed password from users nested in workItemBase response schema
+# TODO: Create dependencies for each class when needed (add_parent, add_contributor, etc)
+# TODO: Clean code Refactor

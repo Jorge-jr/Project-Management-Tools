@@ -5,7 +5,6 @@ from pydantic import BaseModel, ConfigDict
 
 
 class WorkItemBase(BaseModel):
-    id: int
     title: str
     description: str
     due_date: Optional[datetime] = None
@@ -13,21 +12,21 @@ class WorkItemBase(BaseModel):
     finished_date: Optional[datetime] = None
     is_deleted: bool = False
     driver_id: int
-    type: WorkItemType
+    work_item_type: WorkItemType
+    contributors: list = []
     status: WorkItemStatus = WorkItemStatus.NEW
-    contributors: list[int] = []
 
 
 class WorkItemCreate(WorkItemBase):
-    driver_id: int
+    parent: Optional[int] = None
 
 
 class WorkItemResponse(WorkItemBase):
     """    parent_id: Optional[int] = None
-    features: list[Feature] = []
+    complex_tasks: list[complex_task] = []
     tasks: list[Task] = []
     driver: dict"""
-    pass
+    id: int
 
     class Config:
         orm_mode = True

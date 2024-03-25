@@ -1,8 +1,9 @@
 from app.core import config
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-if config.settings.environment == "PYTEST":
-    sqlalchemy_database_uri = config.settings.test_sqlalchemy_database_uri
+
+if config.settings.environment == "TESTING":
+    sqlalchemy_database_uri = config.settings.test_database_url
 else:
     sqlalchemy_database_uri = config.settings.database_url
 
