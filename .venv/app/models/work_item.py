@@ -1,8 +1,8 @@
-from app.db.database import Base
+from app.core.session import Base
 from app.models.work_item_enums import WorkItemStatus, WorkItemType
+from app.models.work_items_contributors import work_item_contributors
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum
 from sqlalchemy.orm import relationship
-from app.models.work_items_contributors import work_item_contributors
 
 
 class WorkItem(Base):

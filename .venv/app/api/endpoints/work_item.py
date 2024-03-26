@@ -1,18 +1,12 @@
-from typing import List
+from datetime import datetime
 from app.api import dependencies as deps
-from app.models.team import Team
-from app.models.user import User
-from app.models.user import user_team_association
-from app.models.work_item import *
-from app.models.work_item_enums import WorkItemType
 from app.models.work_item_factory import *
-from app.schemas.work_item import WorkItemCreate, WorkItemBase
-from app.schemas.user import Contributors
+from app.schemas.work_item import WorkItemCreate
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from datetime import datetime
-
+from app.models.work_item import WorkItem
+from app.models.user import User
 
 router = APIRouter()
 

@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 from alembic import context
-from app.db.database import Base
+from app.core.session import Base
 from app.models.user import User
 from app.models.work_item import WorkItem, Task, Project, ComplexTask
 from app.models.team import Team

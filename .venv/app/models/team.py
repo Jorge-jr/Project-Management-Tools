@@ -1,4 +1,4 @@
-from app.db.database import Base
+from app.core.session import Base
 from app.models.user_team import user_team_association
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship

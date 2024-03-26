@@ -1,18 +1,18 @@
 import time
 from collections.abc import AsyncGenerator
+
 import jwt
 from app.core import security
 from app.core.config import settings
 from app.core.session import async_session
 from app.models.user import User
-from fastapi import Depends, HTTPException, status
+from app.models.work_item_enums import WorkItemType
+from app.models.work_item_factory import WorkItemFactory, TaskFactory, ProjectFactory, ComplexTaskFactory
+from fastapi import Depends, HTTPException
+from fastapi import status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends, HTTPException
-from app.models.work_item_enums import WorkItemType
-from app.models.work_item_factory import WorkItemFactory, TaskFactory, ProjectFactory, ComplexTaskFactory
-
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="auth/access-token")
 

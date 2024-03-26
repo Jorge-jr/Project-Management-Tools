@@ -5,10 +5,9 @@ from app.api.endpoints import task as task_router
 from app.api.endpoints import team as team_router
 from app.api.endpoints import user as user_router
 from app.api.endpoints import work_item as work_item_router
-from app.db.database import Base
-from app.db.database import async_engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.session import async_engine, Base
 
 
 async def create_tables():
@@ -17,6 +16,8 @@ async def create_tables():
 
 
 app = FastAPI()
+
+
 
 app.add_middleware(
     CORSMiddleware,

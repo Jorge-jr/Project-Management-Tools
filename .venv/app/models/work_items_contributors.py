@@ -1,6 +1,6 @@
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship
-from app.db.database import Base
+from app.core.session import Base
 
 
 work_item_contributors = Table(

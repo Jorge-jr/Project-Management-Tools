@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Dict
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.work_item import Task, Project, ComplexTask, WorkItem
-from app.models.user import User
+
+from app.models.work_item import Task, Project, ComplexTask
 from app.models.work_item_enums import WorkItemType
-from sqlalchemy import select
-from typing import Optional
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class WorkItemFactory(ABC):

@@ -1,5 +1,6 @@
 from datetime import datetime
-from app.db.database import Base
+
+from app.core.session import Base
 from app.models.user_role import UserRole
 from app.models.user_team import user_team_association
 from app.models.work_items_contributors import work_item_contributors
