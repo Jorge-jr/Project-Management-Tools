@@ -8,7 +8,10 @@ from app.api.endpoints import work_item as work_item_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.session import async_engine, Base
+from app.core.config import settings
 
+
+print(settings.environment)
 
 async def create_tables():
     async with async_engine.begin() as conn:
@@ -16,7 +19,6 @@ async def create_tables():
 
 
 app = FastAPI()
-
 
 
 app.add_middleware(
@@ -47,11 +49,15 @@ async def shutdown_event():
     pass
 
 
-# TODO: environment variables
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+
 # TODO: implement privileges (stakeholder, driver, admin, read-only)
 # TODO: implement hard delete for work_items and users (admin only)
 # TODO: create 'testing' environment (sqlite)
-# TODO: implement logger
 # TODO: Test invalid token scenarios
 # TODO: Create dependencies for each class when needed (add_parent, add_contributor, etc)
 # TODO: Clean code Refactor
+# TODO: STUDY https://github.com/tiangolo/full-stack-fastapi-template/

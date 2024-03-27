@@ -15,5 +15,6 @@ def test_config():
     print("Database URL:", settings.database_url)
     print("Test Database URL:", settings.test_database_url)
 
+
 if __name__ == "__main__":
     test_config()
