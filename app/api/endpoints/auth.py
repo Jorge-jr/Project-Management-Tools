@@ -1,5 +1,4 @@
 import time
-
 import jwt
 from app.api import dependencies as deps
 from app.core import config, security

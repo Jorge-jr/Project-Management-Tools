@@ -1,6 +1,4 @@
-# from app.api.models.user import UserOut
 import time
-
 from app.core.config import settings
 from app.schemas.user import AccessTokenResponse
 from fastapi.security import OAuth2PasswordBearer
@@ -8,8 +6,8 @@ from jose import jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -38,22 +36,7 @@ def generate_access_token_response(subject: str | int):
     )
 
 
-'''def create_access_token(data: dict) -> str:
-    to_encode = data.copy()
-    expires = datetime.utcnow() + timedelta(minutes=settings.jwt_expire_minutes)
-    to_encode.update({"exp": expires})
-    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
-    return encoded_jwt'''
-
-
 def create_jwt_token(subject: str | int, exp_secs: int, refresh: bool):
-    """Creates jwt access or refresh token for user.
-
-    Args:
-        subject: anything unique to user, id or email etc.
-        exp_secs: expire time in seconds
-        refresh: if True, this is refresh token
-    """
 
     issued_at = int(time.time())
     expires_at = issued_at + exp_secs
@@ -69,6 +52,7 @@ def create_jwt_token(subject: str | int, exp_secs: int, refresh: bool):
         key=settings.secret_key,
         algorithm=settings.algorithm,
     )
+
     return encoded_jwt, expires_at, issued_at
 
 

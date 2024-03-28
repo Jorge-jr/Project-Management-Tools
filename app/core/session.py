@@ -8,7 +8,7 @@ if settings.environment == "TESTING":
 else:
     sqlalchemy_database_uri = settings.database_url
 
-async_engine = create_async_engine(sqlalchemy_database_uri, pool_pre_ping=True, echo=True)
+async_engine = create_async_engine(sqlalchemy_database_uri, pool_pre_ping=True)
 async_session = async_sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
 
 

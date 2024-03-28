@@ -19,8 +19,6 @@ async def create_tables():
         await conn.run_sync(Base.metadata.create_all)
 
 
-async def drop_tables():
-    pass
 
 app = FastAPI()
 
