@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.session import async_engine, Base
 from app.core.config import settings
+from contextlib import asynccontextmanager
 
 
 print(settings.environment)
@@ -17,6 +18,9 @@ async def create_tables():
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+
+async def drop_tables():
+    pass
 
 app = FastAPI()
 
@@ -38,15 +42,13 @@ app.include_router(complex_task_router.router, prefix='/complex_task', tags=["co
 app.include_router(task_router.router, prefix='/task', tags=["task"])
 
 
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Perform startup operations
     await create_tables()
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    # if env == 'testing': drop_tables()
-    pass
+    yield
+    # Perform shutdown operations
+    await drop_tables()
 
 
 @app.get("/")
