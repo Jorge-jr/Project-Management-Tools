@@ -49,7 +49,6 @@ async def root():
 
 # TODO: implement privileges (stakeholder, driver, admin, read-only)
 # TODO: implement hard delete for work_items and users (admin only)
-# TODO: create 'testing' environment (sqlite)
 # TODO: Test invalid token scenarios
 # TODO: Create dependencies for each class when needed (add_parent, add_contributor, etc)
 # TODO: Clean code Refactor

@@ -2,5 +2,10 @@
 __pycache__/
 *.py[cod]
 .env
+.env*
 .idea/
 .venv/
+.idea
+.idea*
+.run
+htmlReport
