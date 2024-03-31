@@ -20,6 +20,7 @@ class User(Base):
     full_name = Column(String)
     role = Column(Enum(UserRole), default=UserRole.VISITOR)
     signup_date = Column(DateTime, default=datetime.utcnow)
+    is_deleted = Column(Boolean, default=False)
 
     work_items = relationship(
         "WorkItem",

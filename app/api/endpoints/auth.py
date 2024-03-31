@@ -1,7 +1,8 @@
 import time
 import jwt
 from app.api import dependencies as deps
-from app.core import config, security
+from app.core.config import settings
+from app.core import security
 from app.models.user import User
 from app.schemas.user import RefreshTokenRequest, AccessTokenResponse
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -40,8 +41,8 @@ async def refresh_token(
     try:
         payload = jwt.decode(
             input.refresh_token,
-            config.settings.SECRET_KEY,
-            algorithms=[security.JWT_ALGORITHM],
+            settings.secret_key,
+            algorithms=[settings.algorithm]
         )
     except (jwt.DecodeError, ValidationError):
         raise HTTPException(
@@ -64,7 +65,7 @@ async def refresh_token(
             detail="Could not validate credentials, token expired or not yet valid",
         )
 
-    result = await session.execute(select(User).where(User.id == token_data.sub))
+    result = await session.execute(select(User).where(User.id == int(token_data.sub)))
     user = result.scalars().first()
 
     if user is None:

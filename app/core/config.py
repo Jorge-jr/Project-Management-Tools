@@ -12,13 +12,12 @@ load_dotenv(dotenv_file)
 
 
 class Settings(BaseSettings):
-    environment: str = "development"
+    environment: str = "testing"
     testing: bool = False
     secret_key: str = ""  # openssl rand -hex 32
     algorithm: str = "HS256"
-    jwt_expire_minutes: int = 11520
-    database_url: Optional[str] = None
-    test_database_url: Optional[str] = None
+    jwt_expire_minutes: int = 6
+    database_url: Optional[str] = "postgresql+asyncpg://postgres:postgres@localhost/TEST_PMT"
 
     class Config:
         env_file = ".env"

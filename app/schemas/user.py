@@ -38,7 +38,6 @@ class UserCreateRequest(BaseRequest):
     email: EmailStr
     password: str
     name: str
-    email: str
     role: UserRole
 
 

@@ -1,6 +1,7 @@
 from app.api import dependencies as deps
 from app.core.security import get_password_hash
 from app.models.user import User
+from app.models.user_role import UserRole
 from app.models.work_item import *
 from app.models.work_item_enums import WorkItemType
 from app.schemas.user import UserCreateRequest, UserUpdatePasswordRequest, UserResponse
@@ -11,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 router = APIRouter()
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me")
 async def read_current_user(
         current_user: User = Depends(deps.get_current_user_from_token),
 ):
@@ -23,8 +24,13 @@ async def delete_current_user(
         current_user: User = Depends(deps.get_current_user_from_token),
         session: AsyncSession = Depends(deps.get_session),
 ):
-    await session.execute(delete(User).where(User.id == current_user.id))
-    await session.commit()
+    user = await session.get(User, current_user.id)
+    if user:
+        user.soft_delete()
+        await session.commit()
+        return {"message": f"User {user.name} deleted"}
+
+    raise HTTPException(status_code=404, detail="User not found")
 
 
 @router.get("/me/work_items")
@@ -32,13 +38,14 @@ async def get_user_work_items(
         current_user: User = Depends(deps.get_current_user_from_token),
         session: AsyncSession = Depends(deps.get_session)
 ):
-    projects = filter(lambda item: item.type == WorkItemType.PROJECT, current_user.work_items)
-    tasks = filter(lambda item: item.type == WorkItemType.TASK, current_user.work_items)
-    complex_tasks = filter(lambda item: item.type == WorkItemType.COMPLEX_TASK, current_user.work_items)
 
-    projects_list = [await session.get(project, project.id) for project in projects]
-    complex_tasks_list = [await session.get(complex_task, complex_task.id) for complex_task in complex_tasks]
-    tasks_list = [await session.get(Task, task.id) for task in tasks]
+    projects = filter(lambda item: item.work_item_type == WorkItemType.PROJECT, current_user.work_items)
+    tasks = filter(lambda item: item.work_item_type == WorkItemType.TASK, current_user.work_items)
+    complex_tasks = filter(lambda item: item.work_item_type == WorkItemType.COMPLEX_TASK, current_user.work_items)
+
+    projects_list = list(projects)
+    complex_tasks_list = list(complex_tasks)
+    tasks_list = list(tasks)
 
     items = {"projects": projects_list, "complex_tasks": complex_tasks_list, "tasks": tasks_list}
 
@@ -57,7 +64,7 @@ async def reset_current_user_password(
     return current_user
 
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register")
 async def register_new_user(
         new_user: UserCreateRequest,
         session: AsyncSession = Depends(deps.get_session),
@@ -76,7 +83,7 @@ async def register_new_user(
     return user
 
 
-@router.post("/delete/{user_id}")
+@router.delete("/{user_id}")
 async def delete_user(
         user_id: int,
         session: AsyncSession = Depends(deps.get_session)
@@ -87,6 +94,8 @@ async def delete_user(
         await session.commit()
         return {"message": f"User {user.name} deleted"}
 
+    raise HTTPException(status_code=404, detail="User not found")
+
 
 @router.get("/{user_id}")
 async def get_user(
@@ -94,21 +103,43 @@ async def get_user(
         session: AsyncSession = Depends(deps.get_session)
 ):
     user = await session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="user not found")
     return {
         "email": user.email,
         "name": user.name,
         "role": user.role,
         "teams": {team.id: team.name for team in user.teams},
         "work_items": {work_item.id: work_item.title for work_item in user.work_items},
-        "full_name": user.full_name
+        "full_name": user.full_name,
+        "is_deleted": user.is_deleted
     }
 
 
 @router.post("/{id}/work_items")
 async def get_user_work_items(
-        id: int,
+        user_id: int,
         current_user: User = Depends(deps.get_current_user_from_token),
         session: AsyncSession = Depends(deps.get_session)
 ):
-    user = await session.get(User, id)
+    user = await session.get(User, user_id)
     return current_user.work_items
+
+
+@router.post("/all")
+async def get_all(session: AsyncSession = Depends(deps.get_session)):
+    result = await session.execute(select(User))
+    users = result.scalars().unique().all()
+    return users
+
+
+@router.post("/undo_delete/")
+async def undo_delete(
+        user_id: int,
+        session: AsyncSession = Depends(deps.get_session)
+):
+    print(user_id)
+    user = await session.get(User, user_id)
+    user.restore()
+    await session.commit()
+    return user

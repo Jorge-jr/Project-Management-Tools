@@ -12,15 +12,12 @@ from app.core.config import settings
 from contextlib import asynccontextmanager
 
 
-print(settings.environment)
-
 async def create_tables():
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
 
-
-app = FastAPI()
+app = FastAPI(debug=True)
 
 
 app.add_middleware(
@@ -40,13 +37,9 @@ app.include_router(complex_task_router.router, prefix='/complex_task', tags=["co
 app.include_router(task_router.router, prefix='/task', tags=["task"])
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Perform startup operations
+@app.on_event("startup")
+async def startup_event():
     await create_tables()
-    yield
-    # Perform shutdown operations
-    await drop_tables()
 
 
 @app.get("/")

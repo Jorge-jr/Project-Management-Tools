@@ -1,5 +1,6 @@
 import asyncio
 import pytest
+from app.core.session import async_session, Base
 
 
 @pytest.fixture(scope="session")
