@@ -21,7 +21,7 @@ Project Management Tools is a comprehensive toolset designed to facilitate both 
 
 1. Clone the repository:
 
-    git clone https://github.com/yourusername/project-management-tools.git
+    git clone https://github.com/Jorge-jr/Project-Management-Tools.git
 
 2. Navigate to the project directory:
 
