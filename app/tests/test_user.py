@@ -12,13 +12,15 @@ async def test_login_with_nonexistent_user():
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_id(get_test_user):
-    user_response = await get_test_user
-    test_user_id = user_response.json()["id"]
+async def test_get_user_by_id(create_test_user_gen):
+    user_gen = create_test_user_gen
+    user = await anext(user_gen)
+    test_user_id = user["id"]
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.get(f"/user/{test_user_id}")
-        assert response.status_code == 200, user_response.json().keys()
-        assert response.json()["email"] == "test_user@example.com", user_response
+        assert response.status_code == 200, user
+        assert "@random.com" in response.json()["email"], user
+    await anext(user_gen)
 
 
 @pytest.mark.asyncio
@@ -31,8 +33,9 @@ async def test_get_user_by_id_failure():
 
 
 @pytest.mark.asyncio
-async def test_delete_current_user(access_token):
-    token_response = await access_token
+async def test_delete_current_user(get_test_user_token_gen):
+    user_token_gen = get_test_user_token_gen
+    token_response = await anext(user_token_gen)
     token = token_response["access_token"]
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.delete(
@@ -42,40 +45,51 @@ async def test_delete_current_user(access_token):
         assert response.status_code == 204
         user_response = await ac.get(f"/user/me", headers={"Authorization": f"Bearer {token}"})
         assert user_response.json()["is_deleted"] is True, user_response
+    await anext(user_token_gen)
 
 
 @pytest.mark.asyncio
-async def test_undo_delete_user_by_id(get_test_user):
-    user_response = await get_test_user
-    test_user_id = user_response.json()["id"]
+async def test_undo_delete_user_by_id(create_test_user_gen):
+    user_gen = create_test_user_gen
+    user = await anext(user_gen)
+    test_user_id = user["id"]
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
         delete_response = await ac.post(f"/user/undo_delete/?user_id={test_user_id}")
         assert delete_response.status_code == 200, delete_response
         get_user_response = await ac.get(f"/user/{test_user_id}")
         assert get_user_response.json()["is_deleted"] is False, get_user_response.json()["is_deleted"]
+    await anext(user_gen)
 
 
 @pytest.mark.asyncio
-async def test_delete_user_by_id(get_test_user):
-    test_user_response = await get_test_user
-    user_id = test_user_response["id"]
+async def test_delete_user_by_id(create_test_user_gen, get_test_admin_token_gen):
+    user_gen = create_test_user_gen
+    user = await anext(user_gen)
+    test_user_id = user["id"]
+    admin_token_gen = get_test_admin_token_gen
+    admin_token = await anext(admin_token_gen)
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.delete(
-            f"/user/{user_id}",
-            headers={"Authorization": f"Bearer {token}"}
+            f"/user/{test_user_id}",
+            headers={"Authorization": f"Bearer {admin_token}"}
         )
         assert response.status_code == 204
-        user_response = await ac.get(f"/user/me", headers={"Authorization": f"Bearer {token}"})
+        user_response = await ac.get(f"/user/{test_user_id}")
         assert user_response.json()["is_deleted"] is True, user_response
+    await anext(user_gen)
+    await anext(admin_token_gen)
 
 
 @pytest.mark.asyncio
-async def test_register_existing_email():
+async def test_register_existing_email(create_test_user_gen):
+    user_gen = create_test_user_gen
+    user = await anext(user_gen)
+    email = user["email"]
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.post(
             "/user/register",
             json={
-                "email": "test_user@example.com",
+                f"email": email,
                 "password": "secret",
                 "name": "test_user",
                 "role": 0
@@ -83,27 +97,32 @@ async def test_register_existing_email():
         )
     assert response.status_code == 400
     assert response.json() == {"detail": "Cannot use this email address"}
+    await anext(user_gen)
 
 
 @pytest.mark.asyncio
-async def test_get_current_user_work_items(access_token):
-    token_response = await access_token
+async def test_get_current_user_work_items(get_test_user_token_gen):
+    token_gen = get_test_user_token_gen
+    token_response = await anext(token_gen)
     token = token_response["access_token"]
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.get("user/me/work_items", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200, response.json()["detail"]
     assert "items" in response.json()
+    await anext(token_gen)
 
 
 @pytest.mark.asyncio
-async def test_delete_user_by_id(access_token):
-    token_response = await access_token
+async def test_delete_user_by_id(get_test_admin_token_gen):
+    admin_token_gen = get_test_admin_token_gen
+    token_response = await anext(admin_token_gen)
     token = token_response["access_token"]
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
         user_response = await ac.get("/user/me", headers={"Authorization": f"Bearer {token}"})
         user_id = user_response.json()["id"]
         delete_response = await ac.delete(f"/user/{user_id}", headers={"Authorization": f"Bearer {token}"})
     assert delete_response.status_code == 200
+    await anext(admin_token_gen)
 
 
 @pytest.mark.asyncio
@@ -115,7 +134,10 @@ async def test_get_all_users():
 
 
 @pytest.mark.asyncio
-async def test_register_new_user():
+async def test_register_new_user(get_test_admin_token_gen):
+    admin_token_gen = get_test_admin_token_gen
+    token_response = await anext(admin_token_gen)
+    token = token_response["access_token"]
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.post(
             "/user/register",
@@ -126,8 +148,14 @@ async def test_register_new_user():
                 "role": 0
             }
         )
-    assert response.status_code == 200
-    assert response.json()["email"] == "new_user@example.com"
+        assert response.status_code == 200
+        assert response.json()["email"] == "new_user@example.com"
+        delete_response = await ac.post(
+            f"/user/hard_delete?user_id={response.json()['id']}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        assert delete_response.status_code == 200, delete_response.json()
+        await anext(admin_token_gen)
 
 
 # TODO: register with invalid email

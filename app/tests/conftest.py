@@ -17,47 +17,7 @@ def event_loop():
 
 
 @pytest.fixture
-async def create_test_user():
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
-        response = await ac.post(
-            "/user/register",
-            json={
-                "email": "test_user@example.com",
-                "password": "secret",
-                "name": "test_user",
-                "role": 0
-            }
-        )
-
-
-@pytest.fixture
-async def access_token(create_test_user):
-    await create_test_user
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
-        login_response = await ac.post(
-            "/auth/access-token",
-            data={
-                "username": "test_user@example.com",
-                "password": "secret"
-            }
-        )
-        return login_response.json()
-
-
-@pytest.fixture
-async def get_test_user(access_token):
-    token_response = await access_token
-    token = token_response["access_token"]
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
-        login_response = await ac.get("/user/me", headers={"Authorization": f"Bearer {token}"})
-        return login_response
-
-
-@pytest.fixture
-async def create_test_user_gen(get_test_admin_token):
-    admin_token_generator = get_test_admin_token
-    admin_token_response = await anext(admin_token_generator)
-    admin_token = admin_token_response["access_token"]
+async def create_test_user_gen(get_test_admin_token_gen):
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.post("/user/register", json={
             "email": generate_random_email(),
@@ -68,10 +28,14 @@ async def create_test_user_gen(get_test_admin_token):
         assert response.status_code == 200, response.text
         user = response.json()
         yield user
+        admin_token_generator = get_test_admin_token_gen
+        admin_token_response = await anext(admin_token_generator)
+        admin_token = admin_token_response["access_token"]
         delete_test_user_response = await ac.post(
             f"/user/hard_delete?user_id={user['id']}",
             headers={"Authorization": f"Bearer {admin_token}"}
         )
+        # detail = delete_test_user_response.json()["detail"]
         await anext(admin_token_generator)
         yield delete_test_user_response.json()
 
@@ -104,7 +68,7 @@ async def create_test_admin_user_gen():
 
 
 @pytest.fixture
-async def get_test_admin_token(create_test_admin_user_gen):
+async def get_test_admin_token_gen(create_test_admin_user_gen):
     admin_generator = create_test_admin_user_gen
     admin = await anext(admin_generator)
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
@@ -118,6 +82,23 @@ async def get_test_admin_token(create_test_admin_user_gen):
     yield response.json()
     delete_admin = await anext(admin_generator)
     yield delete_admin
+
+
+@pytest.fixture
+async def get_test_user_token_gen(create_test_user_gen):
+    user_generator = create_test_user_gen
+    user = await anext(user_generator)
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post(
+            "auth/access-token",
+            data={
+                "username": user["email"],
+                "password": "password"
+            }
+        )
+    yield response.json()
+    delete_user = await anext(user_generator)
+    yield delete_user
 
 
 def generate_random_email(length=12):
