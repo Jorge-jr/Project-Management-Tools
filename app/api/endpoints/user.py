@@ -143,3 +143,19 @@ async def undo_delete(
     user.restore()
     await session.commit()
     return user
+
+
+@router.post("/hard_delete")
+async def hard_delete(
+        user_id: int,
+        session: AsyncSession = Depends(deps.get_session),
+        current_user: User = Depends(deps.get_current_user_from_token)
+):
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=400, detail=f"Not authorized, user: {current_user}")
+
+    user = await session.get(User, user_id)
+    await session.delete(user)
+    await session.commit()
+
+    return {"message": "Deleted successfully"}

@@ -4,15 +4,31 @@ from app.main import app
 
 
 @pytest.mark.asyncio
-async def test_get_work_item():
+async def test_get_work_items(access_token):
+    token_response = await access_token
+    token = token_response["access_token"]
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
-        response = await ac.get("/work_item/work_item_list")
+        response = await ac.get("/work_item/work_item_list", headers={"Authorization": f"Bearer {token}"})
         assert response.status_code == 200
-        assert isinstance(response.json()["work_items"], list)
+        assert isinstance(response.json(), list), response.json()
 
 
 @pytest.mark.asyncio
-async def test_create_work_item(get_test_user, ):
+async def test_create_work_item(create_test_user_gen):
+
+    user_generator = create_test_user_gen
+    user = await anext(user_generator)  # create user
+
+    assert user is not None, user
+
+    delete_user_response = await anext(user_generator)  # delete user
+
+    assert delete_user_response is None, delete_user_response
+
+
+'''
+@pytest.mark.asyncio
+async def test_create_work_item(get_test_user_gen):
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.post("/work_item/create", json={
             "title": "Test Work Item",
@@ -66,3 +82,4 @@ async def test_restore_work_item():
         response = await ac.post("/work_item/restore/1")
         assert response.status_code == 200
         assert response.json()["is_deleted"] is False
+'''

@@ -53,7 +53,7 @@ async def read_work_items(
 async def get_work_item(id: int, session: AsyncSession = Depends(deps.get_session)):
 
     work_item = await session.get(WorkItem, id)
-    return  prepare_work_item_response(work_item)
+    return prepare_work_item_response(work_item)
 
 
 @router.post("/new_work_item")
@@ -63,13 +63,11 @@ async def create_work_item(
         session: AsyncSession = Depends(deps.get_session),
 ):
     try:
-        # Use the factory to create the new work item asynchronously
         new_work_item_data = {key: value for key, value in work_item.dict().items() if
                               key not in ["parent", "contributors"]}
         new_work_item = await factory.create_work_item(new_work_item_data)
 
-        # Set the parent if provided
-        if 'parent' in work_item.dict():
+        if work_item.parent:
             parent = await session.get(WorkItem, work_item.dict()['parent'])
             if parent is None:
                 raise ValueError(f"Parent with ID {work_item.dict()['parent']} not found")
@@ -85,9 +83,7 @@ async def create_work_item(
 
         return {"new_item_id": new_work_item.id, "message": "Successfully created a new work item"}
     except Exception as e:
-        # Log the error for debugging purposes
         print(f"An error occurred: {e}")
-        # Raise an HTTPException with status code 500 (Internal Server Error)
         raise HTTPException(status_code=500, detail="An unexpected error occurred while creating the work item")
 
 
