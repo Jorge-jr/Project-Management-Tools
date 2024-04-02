@@ -3,7 +3,7 @@ import pytest
 from app.main import app
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_get_work_items(get_test_user_token_gen):
     token_gen = get_test_user_token_gen
     token_response = await anext(token_gen)
@@ -15,7 +15,7 @@ async def test_get_work_items(get_test_user_token_gen):
     await anext(token_gen)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_create_work_item(create_test_user_gen):
 
     user_generator = create_test_user_gen

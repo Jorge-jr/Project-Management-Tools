@@ -143,7 +143,7 @@ async def close_work_item(
         user_id: int,
         work_item_id: int,
         session: AsyncSession = Depends(deps.get_session),
-        finished_date: datetime = datetime.utcnow()
+        finished_date: datetime = datetime.now()
 ):
     work_item = await session.get(WorkItem, work_item_id)
     user = await session.get(User, user_id)

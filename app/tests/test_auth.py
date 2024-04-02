@@ -6,7 +6,7 @@ from app.core.config import settings
 from app.main import app
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_get_access_token(create_test_user_gen):
     user_gen = create_test_user_gen
     user = await anext(user_gen)
@@ -18,7 +18,7 @@ async def test_get_access_token(create_test_user_gen):
     await anext(user_gen)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_access_token_failure():
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.post(
@@ -30,7 +30,7 @@ async def test_access_token_failure():
     assert "detail" in response.json()
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_token_expired(get_test_user_token_gen):
     token_gen = get_test_user_token_gen
     token_response = await anext(token_gen)
@@ -43,7 +43,7 @@ async def test_token_expired(get_test_user_token_gen):
     await anext(token_gen)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_token_not_expired(get_test_user_token_gen):
     token_gen = get_test_user_token_gen
     token_response = await anext(token_gen)
@@ -55,7 +55,7 @@ async def test_token_not_expired(get_test_user_token_gen):
     await anext(token_gen)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_refresh_token(get_test_user_token_gen):
     token_gen = get_test_user_token_gen
     token_response = await anext(token_gen)

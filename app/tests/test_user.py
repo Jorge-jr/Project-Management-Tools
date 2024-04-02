@@ -3,7 +3,7 @@ import pytest
 from app.main import app
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope='session')
 async def test_login_with_nonexistent_user():
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.post("auth/access-token", data={"username": "nonexistent@example.com", "password": "bad_password"})
@@ -11,7 +11,7 @@ async def test_login_with_nonexistent_user():
     assert response.json() == {"detail": "Incorrect email or password"}
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_get_user_by_id(create_test_user_gen):
     user_gen = create_test_user_gen
     user = await anext(user_gen)
@@ -23,7 +23,7 @@ async def test_get_user_by_id(create_test_user_gen):
     await anext(user_gen)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_get_user_by_id_failure():
     test_user_id = -1
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
@@ -32,7 +32,7 @@ async def test_get_user_by_id_failure():
         assert response.json()["detail"] == "user not found"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_delete_current_user(get_test_user_token_gen):
     user_token_gen = get_test_user_token_gen
     token_response = await anext(user_token_gen)
@@ -48,7 +48,7 @@ async def test_delete_current_user(get_test_user_token_gen):
     await anext(user_token_gen)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_undo_delete_user_by_id(create_test_user_gen):
     user_gen = create_test_user_gen
     user = await anext(user_gen)
@@ -61,7 +61,7 @@ async def test_undo_delete_user_by_id(create_test_user_gen):
     await anext(user_gen)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_delete_user_by_id(create_test_user_gen, get_test_admin_token_gen):
     user_gen = create_test_user_gen
     user = await anext(user_gen)
@@ -80,7 +80,7 @@ async def test_delete_user_by_id(create_test_user_gen, get_test_admin_token_gen)
     await anext(admin_token_gen)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_register_existing_email(create_test_user_gen):
     user_gen = create_test_user_gen
     user = await anext(user_gen)
@@ -100,7 +100,7 @@ async def test_register_existing_email(create_test_user_gen):
     await anext(user_gen)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_get_current_user_work_items(get_test_user_token_gen):
     token_gen = get_test_user_token_gen
     token_response = await anext(token_gen)
@@ -112,7 +112,7 @@ async def test_get_current_user_work_items(get_test_user_token_gen):
     await anext(token_gen)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_delete_user_by_id(get_test_admin_token_gen):
     admin_token_gen = get_test_admin_token_gen
     token_response = await anext(admin_token_gen)
@@ -125,7 +125,7 @@ async def test_delete_user_by_id(get_test_admin_token_gen):
     await anext(admin_token_gen)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_get_all_users():
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.post("/user/all")
@@ -133,7 +133,7 @@ async def test_get_all_users():
     assert isinstance(response.json(), list)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_register_new_user(get_test_admin_token_gen):
     admin_token_gen = get_test_admin_token_gen
     token_response = await anext(admin_token_gen)

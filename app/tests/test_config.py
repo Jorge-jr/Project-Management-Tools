@@ -1,9 +1,12 @@
 import os
 
+import pytest
+
 from app.core.config import settings
 
 
-def test_config():
+@pytest.mark.asyncio(scope="session")
+async def test_config():
     assert settings.environment.upper() == 'TESTING'
     assert settings.testing is True
     print("Secret Key:", settings.secret_key)
@@ -14,3 +17,6 @@ def test_config():
 
 if __name__ == "__main__":
     test_config()
+
+
+# TODO: refactor

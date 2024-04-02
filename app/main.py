@@ -8,8 +8,6 @@ from app.api.endpoints import work_item as work_item_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.session import async_engine, Base
-from app.core.config import settings
-from contextlib import asynccontextmanager
 
 
 async def create_tables():

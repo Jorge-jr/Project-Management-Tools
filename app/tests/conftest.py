@@ -6,16 +6,6 @@ import random
 import string
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
-
-
 @pytest.fixture
 async def create_test_user_gen(get_test_admin_token_gen):
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as ac:
@@ -35,7 +25,6 @@ async def create_test_user_gen(get_test_admin_token_gen):
             f"/user/hard_delete?user_id={user['id']}",
             headers={"Authorization": f"Bearer {admin_token}"}
         )
-        # detail = delete_test_user_response.json()["detail"]
         await anext(admin_token_generator)
         yield delete_test_user_response.json()
 

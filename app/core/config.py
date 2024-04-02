@@ -6,8 +6,8 @@ from pydantic import Field
 
 
 environment = os.getenv("ENVIRONMENT", "development")
-print(environment)
-dotenv_file = f".env.{environment}"
+dotenv_file = f".env.{environment.lower()}"
+print(f"loading config from {dotenv_file}")
 load_dotenv(dotenv_file)
 
 
